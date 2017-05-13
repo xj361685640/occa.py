@@ -23,7 +23,7 @@
 class Version(object):
     major = 0
     minor = 1
-    micro = 1
+    micro = 5
 
     def __str__(self):
         return '{major}.{minor}.{micro}'.format(major=self.major,

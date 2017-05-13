@@ -1,27 +1,29 @@
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 from subprocess import check_call
-from distutils.command.sdist import sdist
+from setuptools.command.install import install
 
-DIR = os.path.dirname(__file__)
-
-def build_occa():
-    if not os.path.exists('.git'):
-        return
-    # Pull occa
-    check_call('git submodule update --init'.split())
-    # Compile occa
-    check_call('make CXXFLAGS=-O3 -j4'.split(),
-               cwd=os.path.join(DIR, 'submodules/occa'))
+from setuptools import Command
+from setuptools.command.build_ext import build_ext
 
 def build_c_wrapper():
     # Compile python occa c module
     check_call('make'.split())
 
-class sdist_build(sdist):
+class BuildCommand(build_ext):
     def run(self):
-        build_occa()
-        sdist.run(self)
+        self.run_command('build_occa')
+        build.run(self)
+
+class BuildOccaCommand(Command):
+    def run(self):
+        if not os.path.exists('.git'):
+            return
+        # Pull occa
+        check_call('git submodule update --init'.split())
+        # Compile occa
+        check_call('make CXXFLAGS=-O3 -j4'.split(),
+                   cwd='./submodules/occa')
 
 def setup_package():
     # Import after compiling occa.c
@@ -68,11 +70,18 @@ def setup_package():
 
         keywords='occa hpc gpu jit openmp opencl cuda',
 
-        install_requires=['numpy'],
-
         cmdclass={
-            'sdist': sdist_build,
+            'build_ext': BuildCommand,
+            'build_occa': BuildOccaCommand,
         },
+
+        packages=['occa'],
+        package_data={
+            'occa': ['*'],
+            'submodules': ['occa'],
+        },
+
+        install_requires=['numpy'],
     )
 
 if __name__ == '__main__':
