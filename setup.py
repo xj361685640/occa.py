@@ -1,10 +1,13 @@
 import os
 from setuptools import setup
 from subprocess import check_call
+from distutils.command.sdist import sdist
 
 DIR = os.path.dirname(__file__)
 
 def build_occa():
+    if not os.path.exists('.git'):
+        return
     # Pull occa
     check_call('git submodule update --init'.split())
     # Compile occa
@@ -15,7 +18,12 @@ def build_c_wrapper():
     # Compile python occa c module
     check_call('make'.split())
 
-def run_setup():
+class sdist_build(sdist):
+    def run(self):
+        build_occa()
+        sdist.run(self)
+
+def setup_package():
     # Import after compiling occa.c
     from occa import version
     setup(
@@ -61,12 +69,11 @@ def run_setup():
         keywords='occa hpc gpu jit openmp opencl cuda',
 
         install_requires=['numpy'],
-    )
 
-def setup_package():
-    build_occa()
-    # build_c_wrapper()
-    run_setup()
+        cmdclass={
+            'sdist': sdist_build,
+        },
+    )
 
 if __name__ == '__main__':
     setup_package()

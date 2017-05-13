@@ -1,0 +1,15 @@
+include MANIFEST.in
+include *.txt
+include setup.py
+
+# All source files
+recursive-include occa *
+
+# All documentation
+recursive-include submodules/occa *
+recursive-exclude submodules/occa/examples *
+recursive-exclude submodules/occa/bin *
+recursive-exclude submodules/occa/parser_sandbox *
+recursive-exclude submodules/occa/obj *
+recursive-exclude submodules/occa/lib *
+global-exclude *.pyc *.o
