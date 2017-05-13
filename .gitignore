@@ -1,0 +1,7 @@
+.gitattributes
+.gitsubmodule
+
+*.obj
+*.pyc
+
+*.egg-info
